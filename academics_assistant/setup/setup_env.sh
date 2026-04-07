@@ -3,13 +3,13 @@
 # Get Google Cloud Project ID
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
 
-if [ -z "$PROJECT_ID" ]; then
+if [ -z "my-chrt-apr-hck-project" ]; then
     echo "Error: Could not determine Google Cloud Project ID."
     echo "Please run 'gcloud config set project <PROJECT_ID>' first."
     exit 1
 fi
 
-echo "Found Project ID: $PROJECT_ID"
+echo "Found Project ID: my-chrt-apr-hck-project"
 
 # Enable necessary APIs
 echo "Enabling APIs.."
@@ -56,9 +56,9 @@ mkdir -p $(dirname "$ENV_FILE")
 
 cat <<EOF > "$ENV_FILE"
 GOOGLE_GENAI_USE_VERTEXAI=1
-GOOGLE_CLOUD_PROJECT=$PROJECT_ID
+GOOGLE_CLOUD_PROJECT=my-chrt-apr-hck-project
 GOOGLE_CLOUD_LOCATION=global
-MAPS_API_KEY=$API_KEY
+MAPS_API_KEY="AIzaSyDifrHsrr4uEV3vdGKaiBgsPhGKFE25cEs"
 EOF
 
 echo "Successfully updated $ENV_FILE"
