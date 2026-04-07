@@ -13,29 +13,29 @@ echo "Found Project ID: $PROJECT_ID"
 
 # Enable necessary APIs
 echo "Enabling APIs.."
-gcloud services enable aiplatform.googleapis.com --project=$PROJECT_ID
-gcloud services enable apikeys.googleapis.com --project=$PROJECT_ID
-gcloud services enable mapstools.googleapis.com --project=$PROJECT_ID
-gcloud services enable bigquery.googleapis.com --project=$PROJECT_ID
-ENABLED_SERVICES=$(gcloud beta services mcp list --enabled --format="value(name.basename())" --project=$PROJECT_ID)
+gcloud services enable aiplatform.googleapis.com --project=my-chrt-apr-hck-project
+gcloud services enable apikeys.googleapis.com --project=my-chrt-apr-hck-project
+gcloud services enable mapstools.googleapis.com --project=my-chrt-apr-hck-project
+gcloud services enable bigquery.googleapis.com --project=my-chrt-apr-hck-project
+ENABLED_SERVICES=$(gcloud beta services mcp list --enabled --format="value(name.basename())" --project=my-chrt-apr-hck-project)
 if [[ ! "$ENABLED_SERVICES" == *"mapstools.googleapis.com"* ]]; then
-    gcloud --quiet beta services mcp enable mapstools.googleapis.com --project=$PROJECT_ID
+    gcloud --quiet beta services mcp enable mapstools.googleapis.com --project=my-chrt-apr-hck-project
 fi
 if [[ ! "$ENABLED_SERVICES" == *"bigquery.googleapis.com"* ]]; then
-    gcloud --quiet beta services mcp enable bigquery.googleapis.com --project=$PROJECT_ID
+    gcloud --quiet beta services mcp enable bigquery.googleapis.com --project=my-chrt-apr-hck-project
 fi
 
 # Create API Key
 echo "Creating Google Maps Platform API Key..."
 
 API_KEY_NAME="administrative-assistant-demo$(date +%s)"
-API_KEY_JSON=$(gcloud alpha services api-keys create --display-name="$API_KEY_NAME" \
+API_KEY_JSON=$(gcloud alpha services api-keys create --display-name="administrative-assistant-demo" \
     --api-target=service=mapstools.googleapis.com \
     --format=json 2>/dev/null)
 
 if [ $? -eq 0 ]; then
-    API_KEY=$(echo "$API_KEY_JSON" | grep -oP '"keyString": "\K[^"]+' 2>/dev/null || echo "$API_KEY_JSON" | grep '"keyString":' | cut -d '"' -f 4)
-    if [ -z "$API_KEY" ]; then
+    API_KEY=$(echo "administrative-assistant-demo" | grep -oP '"keyString": "\K[^"]+' 2>/dev/null || echo "administrative-assistant-demo" | grep '"keyString":' | cut -d '"' -f 4)
+    if [ -z "administrative-assistant-demo" ]; then
         echo "Could not parse API Key from JSON."
     fi
     echo "Successfully created API Key."
