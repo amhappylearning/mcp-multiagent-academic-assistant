@@ -9,15 +9,38 @@ from google.adk.tools.bigquery import BigQueryToolset, BigQueryCredentialsConfig
 from google.adk.agents import LlmAgent
 from google.adk.agents.llm_agent import Agent
 
+import logging
+import google.cloud.logging
+from dotenv import load_dotenv
+
+from google.adk.agents import SequentialAgent
+from google.adk.tools.tool_context import ToolContext
+from google.adk.tools.langchain_tool import LangchainTool
+
+
+import google.auth
+import google.auth.transport.requests
+import google.oauth2.id_token
+
+# --- Setup Logging and Environment ---
+
+cloud_logging_client = google.cloud.logging.Client()
+cloud_logging_client.setup_logging()
+
+load_dotenv()
+
+model_name = os.getenv("MODEL")
+
 from toolbox_core import ToolboxSyncClient
 
 toolbox = ToolboxSyncClient("http://127.0.0.1:5000")
 dotenv.load_dotenv()
 
-PROJECT_ID = os.getenv('GOOGLE_CLOUD_PROJECT', 'project_not_set')
+# Load all the tools
+tools = toolbox.load_toolset('my_bq_toolset')
+tools = toolbox.load_toolset('my_maps_toolset')
 
-maps_toolset = tools.get_maps_mcp_toolset()
-bigquery_toolset = tools.get_bigquery_mcp_toolset()
+PROJECT_ID = os.getenv('GOOGLE_CLOUD_PROJECT', 'project_not_set')
 
 
 # 1. Model Configuration
@@ -26,8 +49,16 @@ llm = Gemini(model_id="gemini-3.1-pro-preview")
 
 # 2. Tool Setup
 # Google Search for real-time academic trends
-search_tool = GoogleSearch()
+search_tool = [google-search]
 
+#greeter
+def prompt_saver(
+    tool_context: ToolContext, prompt: str
+) -> dict[str, str]:
+    """Saves the user's initial prompt to the state."""
+    tool_context.state["PROMPT"] = prompt
+    logging.info(f"[State updated] Added to PROMPT: {prompt}")
+    return {"status": "success"}
 
 # 3. Sub-Agent: Summary Specialist
 summary_agent = Agent(
@@ -42,13 +73,23 @@ summary_agent = Agent(
     """
 )
 
+agent_workflow = SequentialAgent(
+    name="agent_workflow",
+    description="The main workflow for handling a user's request about academic session.",
+    sub_agents=[summary_agent]     # Step 2: generate the summary and the final response
+    
+)
+
 # 4. Root Agent: Academic Assistant
 academic_assistant = LlmAgent(
     name="AcademicAssistant",
-    model="gemini-3.1-prro-preview",
-    description="Main interface for academic year oversight and consultation management.",
-    sub_agents=[summary_agent],
-    instruction=f"""
+    model="gemini-3.1-pro-preview",
+    description=(
+        "Main interface for academic year oversight and consultation management."
+    ),
+   
+    
+    instruction=(f"""
     You are the Lead Academic Assistant. You have access to the 'admin-data' and 
     'consultations' tables in BigQuery.
     
@@ -73,7 +114,9 @@ academic_assistant = LlmAgent(
                 
                 4. Delegate to the 'SummaryAgent' when a structured final report or 
        executive summary is needed.    
-                """,
-    tools=[maps_toolset, bigquery_toolset, search_tool]
+                """
+                )  ,
+    tools=tools,
+    sub_agents= [prompt_save], [agent_workflow]
   )
 
