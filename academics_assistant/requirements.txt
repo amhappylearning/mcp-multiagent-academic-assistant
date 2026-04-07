@@ -1,5 +1,7 @@
 pandas
 numpy
 google-cloud-bigquery
-google-adk == "1.28.1"
+google-adk
 model == "gemini-3.1-pro-preview"
+toolbox-core
+a2a-sdk
