@@ -2,7 +2,7 @@
 
 PROJECT_ID=$(gcloud config get-value project)
 DATASET_NAME="administration"
-LOCATION="US"
+LOCATION="us-central1"
 
 # Generate bucket name if not provided
 if [ -z "$1" ]; then
